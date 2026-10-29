@@ -1,6 +1,6 @@
 /**
  * ClipFind extension popup.
- * Shows the active YouTube video (if any), analysis status, and recent discoveries.
+ * Shows the active YouTube video (if any), analysis status, and privacy controls.
  * Does NOT read YouTube page DOM directly; relies on tab info + storage.
  */
 import { sendMessage } from './modules/messaging.js';
@@ -14,9 +14,14 @@ const els = {
   btnAnalyze: document.getElementById('btn-analyze'),
   btnOpenPanel: document.getElementById('btn-open-panel'),
   count: document.getElementById('current-video-count'),
-  recentCard: document.getElementById('recent-card'),
-  recentList: document.getElementById('recent-list'),
-  btnClear: document.getElementById('btn-clear-history'),
+  privacyCard: document.getElementById('privacy-card'),
+  btnClearHistory: document.getElementById('btn-clear-history'),
+  btnClearLocal: document.getElementById('btn-clear-local'),
+  toggleAi: document.getElementById('toggle-ai'),
+  toggleVisual: document.getElementById('toggle-visual'),
+  toggleAiLabel: document.getElementById('toggle-ai-label'),
+  toggleVisualLabel: document.getElementById('toggle-visual-label'),
+  versionEl: document.getElementById('version'),
 };
 
 let currentVideoId = null;
@@ -32,22 +37,13 @@ function isYouTubeVideo(url) {
   }
 }
 
-function videoIdFromUrl(url) {
-  try {
-    const u = new URL(url);
-    if (u.pathname.startsWith('/watch')) return u.searchParams.get('v');
-    if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/').pop();
-  } catch {}
-  return null;
-}
-
 async function refresh() {
   const { url, title, id } = await sendMessage({ type: 'CLIPFIND_GET_TAB_INFO' });
   const isYT = isYouTubeVideo(url);
   currentVideoId = isYT ? videoIdFromUrl(url) : null;
 
   els.card.hidden = !isYT;
-  els.recentCard.hidden = false;
+  els.privacyCard.hidden = !isYT;
 
   if (isYT) {
     els.title.textContent = title || 'YouTube video';
@@ -55,12 +51,10 @@ async function refresh() {
     els.btnAnalyze.disabled = false;
     els.btnOpenPanel.disabled = false;
     els.btnAnalyze.onclick = () => {
-      // Tell the content script on the active tab to run analysis.
       chrome.tabs.sendMessage(id, { type: 'CLIPFIND_RUN_ANALYSIS', videoId: currentVideoId });
       window.close();
     };
     els.btnOpenPanel.onclick = () => {
-      // Panel is created by the content script; just focus the tab.
       chrome.tabs.update(id, { active: true });
       window.close();
     };
@@ -80,6 +74,22 @@ async function loadCount(videoId) {
   } catch {
     els.count.textContent = '';
   }
+}
+
+function videoIdFromUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.pathname.startsWith('/watch')) return u.searchParams.get('v');
+    if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/').pop();
+  } catch {}
+  return null;
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
 }
 
 async function loadRecent() {
@@ -112,22 +122,81 @@ async function loadRecent() {
   }
 }
 
-function escapeHtml(s) {
-  if (!s) return '';
-  const div = document.createElement('div');
-  div.textContent = s;
-  return div.innerHTML;
+async function loadSettings() {
+  const settings = await chrome.storage.local.get(['clipfind:settings', 'clipfind:version']);
+  const version = settings['clipfind:version'] || chrome.runtime.getManifest().version;
+  els.versionEl.textContent = version;
+
+  const settingsObj = settings['clipfind:settings'] || {};
+  els.toggleAi.checked = settingsObj.aiAnalysis !== false;
+  els.toggleVisual.checked = settingsObj.visualScanning !== false;
+  updateToggleLabels();
 }
 
-els.btnClear.onclick = async () => {
+async function saveSettings() {
+  await chrome.storage.local.set({
+    'clipfind:settings': {
+      aiAnalysis: els.toggleAi.checked,
+      visualScanning: els.toggleVisual.checked,
+    },
+    'clipfind:version': chrome.runtime.getManifest().version,
+  });
+}
+
+function updateToggleLabels() {
+  els.toggleAiLabel.textContent = els.toggleAi.checked ? 'Enabled (requires backend AI key)' : 'Disabled';
+  els.toggleVisualLabel.textContent = els.toggleVisual.checked ? 'Enabled (requires backend AI key)' : 'Disabled';
+
+els.btnClearHistory.onclick = async () => {
+  if (!confirm('Clear all discovery history for this video?')) return;
+  try {
+    if (currentVideoId) {
+      await chrome.storage.local.remove(`clipfind:discoveries:${currentVideoId}`);
+    }
+    els.status.textContent = 'History cleared.';
+  } catch {
+    els.status.textContent = 'Unable to clear history.';
+  }
+};
+
+els.btnClearLocal.onclick = async () => {
+  if (!confirm('Clear ALL discovery history across all videos? This cannot be undone.')) return;
   try {
     const all = await chrome.storage.local.get(null);
     const removals = Object.keys(all).filter((k) => k.startsWith('clipfind:discoveries:'));
     await chrome.storage.local.remove(removals);
-    els.recentList.textContent = 'History cleared.';
+    els.status.textContent = 'All history cleared.';
   } catch {
-    els.recentList.textContent = 'Unable to clear history.';
+    els.status.textContent = 'Unable to clear history.';
   }
 };
 
+els.toggleAi.addEventListener('change', async () => {
+  await saveSettings();
+  updateToggleLabels();
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    for (const tab of tabs) {
+      if (tab.id && tab.url && isYouTubeVideo(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, { type: 'CLIPFIND_SETTINGS_UPDATED' });
+      }
+    }
+  } catch {}
+});
+
+els.toggleVisual.addEventListener('change', async () => {
+  await saveSettings();
+  updateToggleLabels();
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    for (const tab of tabs) {
+      if (tab.id && tab.url && isYouTubeVideo(tab.url)) {
+        chrome.tabs.sendMessage(tab.id, { type: 'CLIPFIND_SETTINGS_UPDATED' });
+      }
+    }
+  } catch {}
+});
+
 refresh().catch(console.error);
+
+}

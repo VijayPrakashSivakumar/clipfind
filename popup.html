@@ -22,14 +22,55 @@
       <p id="current-video-count" class="muted small"></p>
     </section>
 
-    <section class="card" id="recent-card" hidden>
-      <h2>Recent Discoveries</h2>
-      <div id="recent-list" class="recent-list">None yet.</div>
-      <button id="btn-clear-history" class="btn btn-text small">Clear history</button>
+    <section class="card" id="privacy-card" hidden>
+      <h2>Privacy &amp; Data</h2>
+      <p class="muted">ClipFind processes video content locally in your browser. Some features require a backend for AI analysis.</p>
+
+      <div class="setting-row">
+        <label class="setting-label">
+          <span class="setting-name">Clear discovery history</span>
+          <span class="setting-desc">Remove all stored discoveries for this and past videos.</span>
+        </label>
+        <button id="btn-clear-history" class="btn btn-text small">Clear all history</button>
+      </div>
+
+      <div class="setting-row">
+        <label class="setting-label">
+          <span class="setting-name">Local history storage</span>
+          <span class="setting-desc">Discoveries are stored in chrome.storage.local for quick access. This can be cleared at any time.</span>
+        </label>
+        <button id="btn-clear-local" class="btn btn-text small">Clear local history</button>
+      </div>
+
+      <div class="setting-row">
+        <label class="setting-label">
+          <span class="setting-name">AI analysis (Phase 2)</span>
+          <span class="setting-desc">Requires an OpenAI API key in the backend. Transcript analysis is optional and falls back to keyword detection if unavailable.</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggle-ai" />
+          <span class="switch-slider"></span>
+        </label>
+        <span id="toggle-ai-label" class="muted">Enabled (requires backend AI key)</span>
+      </div>
+
+      <div class="setting-row">
+        <label class="setting-label">
+          <span class="setting-name">Visual scanning (Phase 3)</span>
+          <span class="setting-desc">Identifies products/items shown on screen using AI vision. Requires an OpenAI API key in the backend.</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggle-visual" />
+          <span class="switch-slider"></span>
+        </label>
+        <span id="toggle-visual-label" class="muted">Enabled (requires backend AI key)</span>
+      </div>
+
+      <p class="muted small">ClipFind does not collect passwords, unrelated browsing history, or personal information. No data is sold.</p>
     </section>
 
     <footer class="popup-footer">
-      <p class="muted small">ClipFind &middot; Manifest V3</p>
+      <p class="muted small">ClipFind &middot; Manifest V3 &middot; v<span id="version"></span></p>
     </footer>
   </div>
   <script src="popup.js" type="module"></script>

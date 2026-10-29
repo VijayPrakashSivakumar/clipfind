@@ -36,6 +36,7 @@ export class ClipFindUI {
     panel.id = PANEL_ID;
     panel.setAttribute('role', 'region');
     panel.setAttribute('aria-label', 'ClipFind discoveries');
+    panel.setAttribute('tabIndex', '-1');
     const close = document.createElement('button');
     close.className = 'cf-close';
     close.setAttribute('aria-label', 'Close ClipFind panel');
@@ -91,6 +92,14 @@ export class ClipFindUI {
     search.addEventListener('input', (e) => {
       this.query = e.target.value.toLowerCase();
       this.render(this._items);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById(PANEL_ID)) {
+        ui.remove();
+      }
+    });
+
+    return panel;
     });
     return panel;
   }

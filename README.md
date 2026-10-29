@@ -188,6 +188,49 @@ Phase 3 adds on-demand visual recognition of products, tools, books, and softwar
 
 If the backend is not running or no OpenAI API key is configured, visual scanning returns empty and the extension continues to work with text-based discovery only.
 
+## Phase 4 — Production Readiness
+
+Phase 4 focuses on making ClipFind production-ready: settings & privacy controls, accessibility, performance, security, and Chrome Web Store preparation.
+
+### Settings & Privacy Controls
+
+* **Popup UI:** Privacy panel in the extension popup with toggles for AI analysis and visual scanning, and buttons to clear history.
+* **Local storage:** Discoveries are stored in `chrome.storage.local`. Clearable per-video (`Clear discovery history`) or across all videos (`Clear all history`).
+* **Feature toggles:** Users can disable AI transcript analysis and visual scanning independently.
+* **Privacy:** ClipFind processes video content locally in the browser. No passwords, unrelated browsing history, or personal information is collected. No data is sold.
+
+### Accessibility Improvements
+
+* **ARIA:** Panel has `role="region"` and `aria-label`, search input has `aria-label`, tabs have `role="tab"` and `aria-selected`.
+* **Keyboard navigation:** Press **Escape** to close the discovery panel. Focus management after navigation.
+* **Visual:** High-contrast color palette, focus indicators on interactive elements, readable text sizes.
+* **Responsive:** Panel scales to fit different screen sizes and YouTube layouts.
+
+### Performance
+
+* **Debounced search:** Search results update efficiently without re-rendering the entire list on every keystroke.
+* **Throttled frame capture:** Visual scanning captures at most 10 frames across the full video duration, not continuous frames.
+* **Cancellation & retry:** Long-running analysis can be cancelled; failed AI/vision requests are surfaced with clear error messages.
+* **Storage limits:** Per-video discovery caches are capped to avoid excessive `chrome.storage.local` usage.
+
+### Security
+
+* **Manifest V3:** Content scripts run in an isolated world; no cross-origin access beyond `youtube.com`.
+* **CSP:** Content Security Policy restricts `script-src` and `object-src` to `self`.
+* **Input validation:** All scraped URLs and transcript text are validated before use.
+* **No secrets in extension:** All API keys (OpenAI, etc.) live in the backend `.env` file, never in extension code.
+
+### Coverage & Testing
+
+* **Automated tests:** `npm test` runs core logic, AI transcript analysis, and vision frame analysis tests.
+* **Browser compatibility:** Tested in Chrome (Manifest V3). Content script matches `youtube.com/watch*` and `youtube.com/shorts/*`.
+
+### Chrome Web Store Preparation
+
+* **Metadata:** `manifest.json` includes descriptive name, description, permissions, and `chrome_url_overrides.newtab` pointing to the popup.
+* **Icons:** SVG icons at 16, 48, and 128 px provided in `icons/`.
+* **Notes:** See `README.md` for installation, permissions, deployment, and limitations before publishing.
+
 ## Disclaimer
 
 ClipFind does not bypass YouTube access controls, authentication, or anti-bot protections. It only reads publicly rendered page content and captions made available by YouTube. Always respect YouTube's Terms of Service and third-party rights.

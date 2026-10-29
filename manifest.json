@@ -21,8 +21,12 @@
         "https://www.youtube.com/watch*",
         "https://www.youtube.com/shorts/*"
       ],
-      "js": ["content.js"],
-      "css": ["styles.css"],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -35,11 +39,18 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["styles.css"],
-      "matches": ["https://www.youtube.com/*"]
+      "resources": [
+        "styles.css"
+      ],
+      "matches": [
+        "https://www.youtube.com/*"
+      ]
     }
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "chrome_url_overrides": {
+    "newtab": "popup.html"
   }
 }
