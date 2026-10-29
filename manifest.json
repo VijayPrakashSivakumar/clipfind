@@ -49,8 +49,5 @@
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  },
-  "chrome_url_overrides": {
-    "newtab": "popup.html"
   }
 }

@@ -37,6 +37,21 @@ function isYouTubeVideo(url) {
   }
 }
 
+function videoIdFromUrl(url) {
+  try {
+    const u = new URL(url);
+    if (u.pathname.startsWith('/watch')) return u.searchParams.get('v');
+    if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/').pop();
+  } catch {}
+  return null;
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
 async function refresh() {
   const { url, title, id } = await sendMessage({ type: 'CLIPFIND_GET_TAB_INFO' });
   const isYT = isYouTubeVideo(url);
@@ -64,6 +79,7 @@ async function refresh() {
   }
 
   await loadRecent();
+  await loadSettings();
 }
 
 async function loadCount(videoId) {
@@ -74,22 +90,6 @@ async function loadCount(videoId) {
   } catch {
     els.count.textContent = '';
   }
-}
-
-function videoIdFromUrl(url) {
-  try {
-    const u = new URL(url);
-    if (u.pathname.startsWith('/watch')) return u.searchParams.get('v');
-    if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/').pop();
-  } catch {}
-  return null;
-}
-
-function escapeHtml(s) {
-  if (!s) return '';
-  const div = document.createElement('div');
-  div.textContent = s;
-  return div.innerHTML;
 }
 
 async function loadRecent() {
@@ -146,6 +146,7 @@ async function saveSettings() {
 function updateToggleLabels() {
   els.toggleAiLabel.textContent = els.toggleAi.checked ? 'Enabled (requires backend AI key)' : 'Disabled';
   els.toggleVisualLabel.textContent = els.toggleVisual.checked ? 'Enabled (requires backend AI key)' : 'Disabled';
+}
 
 els.btnClearHistory.onclick = async () => {
   if (!confirm('Clear all discovery history for this video?')) return;
@@ -198,5 +199,3 @@ els.toggleVisual.addEventListener('change', async () => {
 });
 
 refresh().catch(console.error);
-
-}
