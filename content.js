@@ -220,6 +220,17 @@ async function runAnalysis(videoId) {
 
     const transcriptText = segments.map((s) => s.text).join(' ');
 
+    // Debug: log what was found
+    log('DEBUG runAnalysis:', {
+      videoId,
+      linksCount: allLinks.length,
+      links: allLinks.slice(0, 5),
+      transcriptSegments: segments.length,
+      transcriptTextPreview: transcriptText.slice(0, 200),
+      metadataTitle: metadata.title,
+      metadataChannel: metadata.channel,
+    });
+
     // 3. AI-powered discovery from full transcript (Phase 2).
     let aiDiscoveries = [];
     if (segments.length) {
@@ -244,6 +255,15 @@ async function runAnalysis(videoId) {
 
     // 6. Merge all sources and dedupe.
     const discoveries = mergeAndDedup(fromLinks, fromKeywords, aiDiscoveries, visualDiscoveries);
+
+    log('DEBUG discoveries:', {
+      fromLinks: fromLinks.length,
+      fromKeywords: fromKeywords.length,
+      aiDiscoveries: aiDiscoveries.length,
+      visualDiscoveries: visualDiscoveries.length,
+      merged: discoveries.length,
+      items: discoveries.map((d) => ({ name: d.name, category: d.category, source: d.source })),
+    });
 
     // 7. Persist + render.
     await saveDiscoveries(videoId, discoveries);
