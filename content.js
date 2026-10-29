@@ -6,12 +6,14 @@
 import { getVideoId, extractMetadata, isSupportedPage, onNavigation } from './modules/youtube.js';
 import { extractDescriptionLinks, extractPlainTextLinks } from './modules/description.js';
 import { transcriptClient } from './modules/transcript.js';
-import { discoverFromLinks, discoverFromKeywords, mergeAndDedup } from './modules/discovery.js';
+import { discoverFromLinks, discoverFromKeywords, mergeAndDedup, buildSearchUrl } from './modules/discovery.js';
 import { ui } from './modules/ui.js';
 
 let currentVideoId = null;
 let analysisRunning = false;
 let panelBound = false;
+
+const BACKEND_BASE = window.__CLIPFIND_BACKEND || 'http://localhost:4000';
 
 function log(...args) {
   console.log('[ClipFind]', ...args);
@@ -87,7 +89,13 @@ async function runAnalysis(videoId) {
 
     const transcriptText = segments.map((s) => s.text).join(' ');
 
-    // 3. Discoveries from links + keyword hints in text.
+    // 4. AI-powered discovery from full transcript (Phase 2).
+    let aiDiscoveries = [];
+    if (segments.length) {
+      aiDiscoveries = await analyzeWithAI(videoId, transcriptText, metadata.title, metadata.channel);
+    }
+
+    // 5. Discoveries from links + keyword hints in text.
     const fromLinks = discoverFromLinks(allLinks, videoId, segments);
     const fromKeywords = discoverFromKeywords(
       `${metadata.title || ''} ${metadata.channel || ''} ${metadata.description || ''} ${transcriptText}`,
@@ -95,7 +103,7 @@ async function runAnalysis(videoId) {
       segments
     );
 
-    const discoveries = mergeAndDedup(fromLinks, fromKeywords);
+    const discoveries = mergeAndDedup(fromLinks, fromKeywords, aiDiscoveries);
 
     // 4. Persist + render.
     await saveDiscoveries(videoId, discoveries);
@@ -198,4 +206,31 @@ function mergeLinks(a, b) {
     if (!map.has(l.url)) map.set(l.url, l);
   }
   return [...map.values()];
+}
+
+/**
+ * Send transcript to the backend for AI-powered recommendation extraction.
+ * Falls back gracefully if the backend is unreachable or no API key is set.
+ */
+async function analyzeWithAI(videoId, transcriptText, title, channel) {
+  if (!transcriptText || transcriptText.trim().length < 20) {
+    return [];
+  }
+  try {
+    const res = await fetch(`${BACKEND_BASE}/api/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ videoId, transcript: transcriptText, title, channel }),
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!res.ok) {
+      log('Backend AI analysis responded', res.status);
+      return [];
+    }
+    const data = await res.json();
+    return data.discoveries || [];
+  } catch (err) {
+    log('Backend AI analysis unavailable (falling back to keywords):', err.message);
+    return [];
+  }
 }

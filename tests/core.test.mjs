@@ -81,6 +81,26 @@ const merged = mergeAndDedup(dLinks, dKeys);
 const ids = merged.map((d) => d.id);
 assert.strictEqual([...new Set(ids)].length, ids.length, 'no duplicate ids');
 
+// 3-way merge with AI discoveries.
+const aiDisc = [{
+  id: 'ai-vid1-macbook',
+  videoId: 'vid1',
+  name: 'MacBook Pro',
+  category: 'products',
+  url: 'https://apple.com/macbook-pro',
+  source: 'clipfind-ai',
+  matchStatus: 'Likely Match',
+  evidence: 'AI found this in transcript',
+  timestamp: 120,
+  confidence: 'high',
+  discoveredAt: Date.now(),
+  thumbnail: null,
+}];
+const merged3 = mergeAndDedup(dLinks, dKeys, aiDisc);
+assert.ok(merged3.some((d) => d.name === 'MacBook Pro' && d.source === 'clipfind-ai'), 'AI discovery included');
+const ids3 = merged3.map((d) => d.id);
+assert.strictEqual([...new Set(ids3)].length, ids3.length, '3-way merge has no duplicate ids');
+
 // ---- formatTime ----
 assert.strictEqual(ui.formatTime(0), '0:00');
 assert.strictEqual(ui.formatTime(60), '1:00');

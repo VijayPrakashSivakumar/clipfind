@@ -114,6 +114,45 @@ Runs unit tests for YouTube URL parsing, description-link extraction, categoriza
 * **Phase 3 — Visual Intelligence:** on-demand frame analysis, on-screen product/software detection, timestamp association.
 * **Phase 4 — Production Readiness:** settings/privacy controls, accessibility, automated E2E tests, Chrome Web Store validation, deployment docs.
 
+## Phase 2 — Intelligent Discovery (Backend AI)
+
+Phase 2 adds AI-powered transcript analysis via a lightweight Express backend. The extension sends the video transcript to `POST /api/analyze`, which uses an LLM (OpenAI by default) to extract product/tool/book recommendations with evidence, confidence, and match status.
+
+### Backend setup
+
+```bash
+cd backend
+cp .env.example .env
+# Add your OpenAI API key to .env
+npm install
+npm start
+```
+
+Endpoints:
+* `GET /api/health`
+* `GET /api/transcript?videoId=&lang=` — caption proxy
+* `POST /api/analyze` — AI transcript analysis `{ videoId, transcript, title?, channel? }`
+
+### Environment variables (backend only, never in extension)
+
+| Variable | Purpose |
+|----------|---------|
+| `OPENAI_API_KEY` | OpenAI API key for transcript analysis |
+| `CLIPFIND_AI_MODEL` | Model to use (default: `gpt-4o-mini`) |
+| `CLIPFIND_BACKEND_URL` | Backend URL the extension calls (default: `http://localhost:4000`) |
+
+### Graceful fallback
+
+If the backend is not running or no API key is configured, ClipFind falls back to Phase 1 keyword-based discovery. The panel still works — it just won't have AI-extracted recommendations.
+
+### What Phase 2 adds
+
+* Full-transcript AI analysis (not just keyword matching)
+* Extracted recommendations with supporting evidence from the transcript
+* Confidence levels (`high` / `medium` / `low`) and match status
+* AI discoveries merged with description-link and keyword discoveries
+* Deduplication across all sources
+
 ## Disclaimer
 
 ClipFind does not bypass YouTube access controls, authentication, or anti-bot protections. It only reads publicly rendered page content and captions made available by YouTube. Always respect YouTube's Terms of Service and third-party rights.

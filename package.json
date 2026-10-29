@@ -5,6 +5,6 @@
   "description": "ClipFind — AI-powered video discovery Chrome extension (Manifest V3).",
   "private": true,
   "scripts": {
-    "test": "node tests/core.test.mjs"
+    "test": "node tests/core.test.mjs && node tests/ai.test.mjs"
   }
 }
