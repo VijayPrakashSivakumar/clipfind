@@ -30,5 +30,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true;
   }
+  if (type === 'CLIPFIND_RUN_ANALYSIS') {
+    // Forward the analysis request to the active YouTube tab's content script.
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0];
+      if (!tab || !tab.id) {
+        sendResponse({ ok: false, error: 'No active tab' });
+        return;
+      }
+      chrome.tabs.sendMessage(tab.id, { type: 'CLIPFIND_RUN_ANALYSIS', videoId: message.videoId }, (response) => {
+        if (chrome.runtime.lastError) {
+          // Content script not loaded yet — inject it now
+          chrome.tabs.executeScript(tab.id, { files: ['content.js'] }, () => {
+            if (chrome.runtime.lastError) {
+              sendResponse({ ok: false, error: chrome.runtime.lastError.message });
+            } else {
+              sendResponse({ ok: true, injected: true });
+            }
+          });
+        } else {
+          sendResponse(response || { ok: true });
+        }
+      });
+    });
+    return true;
+  }
   return false;
 });
