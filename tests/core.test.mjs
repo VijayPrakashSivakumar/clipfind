@@ -101,6 +101,27 @@ assert.ok(merged3.some((d) => d.name === 'MacBook Pro' && d.source === 'clipfind
 const ids3 = merged3.map((d) => d.id);
 assert.strictEqual([...new Set(ids3)].length, ids3.length, '3-way merge has no duplicate ids');
 
+// Visual discovery merge (Phase 3).
+const visualDisc = [{
+  id: 'vision-vid1-1',
+  videoId: 'vid1',
+  name: 'iPhone',
+  category: 'products',
+  url: null,
+  source: 'clipfind-vision',
+  matchStatus: 'Likely Match',
+  evidence: 'Visible in video frame at 04:35',
+  timestamp: 275,
+  confidence: 'medium',
+  discoveredAt: Date.now(),
+  thumbnail: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD',
+}];
+const merged4 = mergeAndDedup(dLinks, dKeys, aiDisc, visualDisc);
+assert.ok(merged4.some((d) => d.name === 'iPhone' && d.source === 'clipfind-vision'), 'Visual discovery included');
+assert.ok(merged4.some((d) => d.thumbnail), 'Visual discovery has thumbnail');
+const ids4 = merged4.map((d) => d.id);
+assert.strictEqual([...new Set(ids4)].length, ids4.length, '4-way merge has no duplicate ids');
+
 // ---- formatTime ----
 assert.strictEqual(ui.formatTime(0), '0:00');
 assert.strictEqual(ui.formatTime(60), '1:00');

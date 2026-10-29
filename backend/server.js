@@ -14,6 +14,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const analysisRouter = require('./routes/analysis');
+const visionRouter = require('./routes/vision');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -26,6 +27,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api', analysisRouter);
+app.use('/api', visionRouter);
 
 /**
  * Proxy for YouTube timedtext captions.

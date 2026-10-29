@@ -153,6 +153,41 @@ If the backend is not running or no API key is configured, ClipFind falls back t
 * AI discoveries merged with description-link and keyword discoveries
 * Deduplication across all sources
 
+## Phase 3 — Visual Intelligence
+
+Phase 3 adds on-demand visual recognition of products, tools, books, and software shown on screen in YouTube videos. The extension captures video frames at key intervals and sends them to a vision AI model (OpenAI GPT-4o-mini by default) running server-side.
+
+### How it works
+
+1. User clicks **"Scan Visuals"** in the ClipFind panel.
+2. The extension captures up to 10 frames at intervals across the video duration.
+3. Each frame is sent to `POST /api/analyze-frame` on the backend.
+4. The backend vision service identifies visible items and returns them with:
+   - Item name and category
+   - Evidence (what's visible in the frame)
+   - Confidence level (`high` / `medium` / `low`)
+   - Match status (`Exact Match` / `Likely Match` / `Visual Similar`)
+   - Timestamp where the item appears
+   - Frame thumbnail preview
+5. Visual discoveries are merged with text-based discoveries and displayed in the panel.
+
+### What Phase 3 adds
+
+* On-demand frame capture (not continuous — only when user clicks "Scan Visuals")
+* Up to 10 key frames scanned per video
+* Visual discovery cards with frame thumbnails
+* Timestamp association for each visual discovery
+* Distinction between exact matches, likely matches, and visually similar items
+* No fabricated images, prices, or ratings
+
+### Backend endpoints (Phase 3)
+
+* `POST /api/analyze-frame` — `{ videoId, timestamp, imageBase64 }` → visual discoveries
+
+### Graceful fallback
+
+If the backend is not running or no OpenAI API key is configured, visual scanning returns empty and the extension continues to work with text-based discovery only.
+
 ## Disclaimer
 
 ClipFind does not bypass YouTube access controls, authentication, or anti-bot protections. It only reads publicly rendered page content and captions made available by YouTube. Always respect YouTube's Terms of Service and third-party rights.

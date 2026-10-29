@@ -8,11 +8,12 @@ const STYLE_ID = 'clipfind-styles';
 
 export class ClipFindUI {
   constructor(opts = {}) {
-    const { onRefresh, onJumpTo, onCopyLink, onOpenLink } = opts;
+    const { onRefresh, onJumpTo, onCopyLink, onOpenLink, onScanVisuals } = opts;
     this.onRefresh = onRefresh;
     this.onJumpTo = onJumpTo;
     this.onCopyLink = onCopyLink;
     this.onOpenLink = onOpenLink;
+    this.onScanVisuals = onScanVisuals;
     this.panel = null;
     this.tabs = ['all', 'products', 'software', 'resources', 'creator'];
     this.activeTab = 'all';
@@ -25,7 +26,7 @@ export class ClipFindUI {
     const s = document.createElement('style');
     s.id = STYLE_ID;
     s.textContent = `
-#${PANEL_ID}{position:fixed;z-index:2147483647;top:110px;right:18px;width:min(380px,calc(100vw-36px));max-height:min(640px,calc(100vh-140px));display:flex;flex-direction:column;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:14px;box-shadow:0 10px 36px rgb(0 0 0 / 45%);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#f1f1f1;box-sizing:border-box;animation:cfFadeIn .22s ease}@keyframes cfFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}#${PANEL_ID} .cf-header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #333}#${PANEL_ID} .cf-brand{font-weight:800;font-size:17px;letter-spacing:-.4px;background:linear-gradient(90deg,#3ea6ff,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}#${PANEL_ID} .cf-status{margin-left:auto;font-size:11px;color:#9aa0a6}#${PANEL_ID} .cf-toolbar{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #2a2a2a;overflow-x:auto}#${PANEL_ID} .cf-tab{flex:0 0 auto;background:transparent;border:1px solid #3a3a3a;color:#c7c7c7;padding:6px 12px;border-radius:20px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}#${PANEL_ID} .cf-tab.active{background:#3ea6ff;color:#0b0b0b;border-color:#3ea6ff}#${PANEL_ID} .cf-tab:hover:not(.active){border-color:#555;color:#fff}#${PANEL_ID} .cf-search-wrap{padding:10px 14px;border-bottom:1px solid #2a2a2a}#${PANEL_ID} .cf-search{width:100%;background:#242424;border:1px solid #3a3a3a;border-radius:8px;color:#f1f1f1;padding:8px 12px;font:inherit;font-size:13px}#${PANEL_ID} .cf-search:focus{outline:2px solid #3ea6ff;border-color:#3ea6ff}#${PANEL_ID} .cf-count{padding:6px 14px;font-size:12px;color:#9aa0a6;border-bottom:1px solid #2a2a2a}#${PANEL_ID} .cf-list{overflow-y:auto;padding:0;min-height:0}#${PANEL_ID} .cf-empty,#${PANEL_ID} .cf-error{padding:24px 16px;text-align:center;color:#9aa0a6;font-size:13px}#${PANEL_ID} .cf-error{color:#ff6b6b}#${PANEL_ID} .cf-card{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #242424;align-items:flex-start}#${PANEL_ID} .cf-card:last-child{border-bottom:none}#${PANEL_ID} .cf-thumb{flex:0 0 auto;width:52px;height:40px;background:#242424;border:1px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888}#${PANEL_ID} .cf-body{flex:1;min-width:0}#${PANEL_ID} .cf-name{font-weight:700;font-size:13.5px;color:#f1f1f1;margin:0 0 4px 0;overflow-wrap:break-word}#${PANEL_ID} .cf-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:#9aa0a6;margin-bottom:4px;flex-wrap:wrap}#${PANEL_ID} .cf-badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}#${PANEL_ID} .cf-badge.exact{background:#2d6a4f;color:#d4edda}#${PANEL_ID} .cf-badge.likely{background:#b8860b;color:#fff3cd}#${PANEL_ID} .cf-badge.search{background:#555;color:#ddd}#${PANEL_ID} .cf-context{font-size:12px;color:#c7c7c7;margin:0 0 8px 0;overflow-wrap:anywhere}#${PANEL_ID} .cf-actions{display:flex;gap:6px;flex-wrap:wrap}#${PANEL_ID} .cf-btn{border:none;border-radius:6px;padding:5px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}#${PANEL_ID} .cf-btn.jump{background:#3ea6ff;color:#0b0b0b}#${PANEL_ID} .cf-btn.jump:hover{background:#65b8ff}#${PANEL_ID} .cf-btn.copy{background:transparent;color:#c7c7c7;border:1px solid #444}#${PANEL_ID} .cf-btn.copy:hover{border-color:#888;color:#fff}#${PANEL_ID} .cf-btn.open{background:#242424;color:#3ea6ff;border:1px solid #3ea6ff}#${PANEL_ID} .cf-btn.open:hover{background:#3ea6ff;color:#0b0b0b}#${PANEL_ID} .cf-refresh-bar{padding:10px 14px;border-top:1px solid #2a2a2a;background:#242424;border-bottom-left-radius:14px;border-bottom-right-radius:14px}#${PANEL_ID} .cf-btn-refresh{width:100%;background:transparent;color:#3ea6ff;border:1px solid #3ea6ff;border-radius:8px;padding:8px;font:inherit;font-weight:700;cursor:pointer}#${PANEL_ID} .cf-btn-refresh:hover{background:rgba(62,166,255,.15)}#${PANEL_ID} .cf-btn-refresh:disabled{opacity:.5;cursor:not-allowed}#${PANEL_ID} .cf-close{position:absolute;top:8px;left:8px;background:transparent;border:none;color:#888;font-size:16px;cursor:pointer;padding:4px;line-height:1}#${PANEL_ID} .cf-close:hover{color:#fff}button{font-family:inherit}`;
+#${PANEL_ID}{position:fixed;z-index:2147483647;top:110px;right:18px;width:min(380px,calc(100vw-36px));max-height:min(640px,calc(100vh-140px));display:flex;flex-direction:column;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:14px;box-shadow:0 10px 36px rgb(0 0 0 / 45%);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#f1f1f1;box-sizing:border-box;animation:cfFadeIn .22s ease}@keyframes cfFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}#${PANEL_ID} .cf-header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #333}#${PANEL_ID} .cf-brand{font-weight:800;font-size:17px;letter-spacing:-.4px;background:linear-gradient(90deg,#3ea6ff,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}#${PANEL_ID} .cf-status{margin-left:auto;font-size:11px;color:#9aa0a6}#${PANEL_ID} .cf-toolbar{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid #2a2a2a;overflow-x:auto}#${PANEL_ID} .cf-tab{flex:0 0 auto;background:transparent;border:1px solid #3a3a3a;color:#c7c7c7;padding:6px 12px;border-radius:20px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}#${PANEL_ID} .cf-tab.active{background:#3ea6ff;color:#0b0b0b;border-color:#3ea6ff}#${PANEL_ID} .cf-tab:hover:not(.active){border-color:#555;color:#fff}#${PANEL_ID} .cf-search-wrap{padding:10px 14px;border-bottom:1px solid #2a2a2a}#${PANEL_ID} .cf-search{width:100%;background:#242424;border:1px solid #3a3a3a;border-radius:8px;color:#f1f1f1;padding:8px 12px;font:inherit;font-size:13px}#${PANEL_ID} .cf-search:focus{outline:2px solid #3ea6ff;border-color:#3ea6ff}#${PANEL_ID} .cf-count{padding:6px 14px;font-size:12px;color:#9aa0a6;border-bottom:1px solid #2a2a2a}#${PANEL_ID} .cf-list{overflow-y:auto;padding:0;min-height:0}#${PANEL_ID} .cf-empty,#${PANEL_ID} .cf-error{padding:24px 16px;text-align:center;color:#9aa0a6;font-size:13px}#${PANEL_ID} .cf-error{color:#ff6b6b}#${PANEL_ID} .cf-card{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #242424;align-items:flex-start}#${PANEL_ID} .cf-card:last-child{border-bottom:none}#${PANEL_ID} .cf-thumb{flex:0 0 auto;width:52px;height:40px;background:#242424;border:1px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888}#${PANEL_ID} .cf-body{flex:1;min-width:0}#${PANEL_ID} .cf-name{font-weight:700;font-size:13.5px;color:#f1f1f1;margin:0 0 4px 0;overflow-wrap:break-word}#${PANEL_ID} .cf-meta{display:flex;gap:8px;align-items:center;font-size:11px;color:#9aa0a6;margin-bottom:4px;flex-wrap:wrap}#${PANEL_ID} .cf-badge{display:inline-block;font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}#${PANEL_ID} .cf-badge.exact{background:#2d6a4f;color:#d4edda}#${PANEL_ID} .cf-badge.likely{background:#b8860b;color:#fff3cd}#${PANEL_ID} .cf-badge.search{background:#555;color:#ddd}#${PANEL_ID} .cf-context{font-size:12px;color:#c7c7c7;margin:0 0 8px 0;overflow-wrap:anywhere}#${PANEL_ID} .cf-actions{display:flex;gap:6px;flex-wrap:wrap}#${PANEL_ID} .cf-btn{border:none;border-radius:6px;padding:5px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}#${PANEL_ID} .cf-btn.jump{background:#3ea6ff;color:#0b0b0b}#${PANEL_ID} .cf-btn.jump:hover{background:#65b8ff}#${PANEL_ID} .cf-btn.copy{background:transparent;color:#c7c7c7;border:1px solid #444}#${PANEL_ID} .cf-btn.copy:hover{border-color:#888;color:#fff}#${PANEL_ID} .cf-btn.open{background:#242424;color:#3ea6ff;border:1px solid #3ea6ff}#${PANEL_ID} .cf-btn.open:hover{background:#3ea6ff;color:#0b0b0b}#${PANEL_ID} .cf-refresh-bar{padding:10px 14px;border-top:1px solid #2a2a2a;background:#242424;border-bottom-left-radius:14px;border-bottom-right-radius:14px}#${PANEL_ID} .cf-btn-refresh{width:100%;background:transparent;color:#3ea6ff;border:1px solid #3ea6ff;border-radius:8px;padding:8px;font:inherit;font-weight:700;cursor:pointer}#${PANEL_ID} .cf-btn-refresh:hover{background:rgba(62,166,255,.15)}#${PANEL_ID} .cf-btn-refresh:disabled{opacity:.5;cursor:not-allowed}#${PANEL_ID} .cf-close{position:absolute;top:8px;left:8px;background:transparent;border:none;color:#888;font-size:16px;cursor:pointer;padding:4px;line-height:1}#${PANEL_ID} .cf-close:hover{color:#fff}#${PANEL_ID} .cf-btn-visual{background:#242424;color:#ff6b6b;border:1px solid #ff6b6b;border-radius:6px;padding:6px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-left:8px}#${PANEL_ID} .cf-btn-visual:hover{background:rgba(255,107,107,.15)}#${PANEL_ID} .cf-btn-visual:disabled{opacity:.5;cursor:not-allowed}#${PANEL_ID} .cf-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}button{font-family:inherit}`;
     document.head.appendChild(s);
   }
   createPanel() {
@@ -75,6 +76,14 @@ export class ClipFindUI {
     btnRefresh.id = 'cf-btn-refresh';
     btnRefresh.textContent = 'Find Everything';
     btnRefresh.onclick = () => this.onRefresh();
+    const btnVisual = document.createElement('button');
+    btnVisual.className = 'cf-btn-visual';
+    btnVisual.id = 'cf-btn-visual';
+    btnVisual.textContent = 'Scan Visuals';
+    btnVisual.onclick = () => {
+      if (this.onScanVisuals) this.onScanVisuals();
+    };
+    refreshBar.appendChild(btnVisual);
     panel.append(close, header, toolbar, searchWrap, count, list, refreshBar);
     document.body.append(panel);
     this.panel = panel;
@@ -123,6 +132,14 @@ export class ClipFindUI {
       btn.textContent = refreshing ? 'Analyzing…' : 'Find Everything';
     }
   }
+
+  setVisualScanning(scanning) {
+    const btn = document.getElementById('cf-btn-visual');
+    if (btn) {
+      btn.disabled = scanning;
+      btn.textContent = scanning ? 'Scanning Visuals…' : 'Scan Visuals';
+    }
+  }
   setItems(items) {
     this._items = items;
     this.render(items);
@@ -163,7 +180,15 @@ export class ClipFindUI {
     card.setAttribute('role', 'article');
     const thumb = document.createElement('div');
     thumb.className = 'cf-thumb';
-    thumb.textContent = this.categoryIcon(item.category);
+    if (item.thumbnail) {
+      const img = document.createElement('img');
+      img.src = item.thumbnail;
+      img.alt = item.name;
+      img.style.display = 'block';
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = this.categoryIcon(item.category);
+    }
     const body = document.createElement('div');
     body.className = 'cf-body';
     const name = document.createElement('div');
