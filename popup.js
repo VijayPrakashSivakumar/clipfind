@@ -65,8 +65,18 @@ async function refresh() {
     els.status.textContent = 'Ready to analyze';
     els.btnAnalyze.disabled = false;
     els.btnOpenPanel.disabled = false;
-    els.btnAnalyze.onclick = () => {
-      chrome.tabs.sendMessage(id, { type: 'CLIPFIND_RUN_ANALYSIS', videoId: currentVideoId });
+    els.btnAnalyze.onclick = async () => {
+      try {
+        const resp = await chrome.runtime.sendMessage({
+          type: 'CLIPFIND_RUN_ANALYSIS',
+          videoId: currentVideoId,
+        });
+        if (resp && resp.injected) {
+          els.status.textContent = 'Extension injected — click Find Everything again.';
+        }
+      } catch (err) {
+        els.status.textContent = 'Error: ' + (err && err.message ? err.message : String(err));
+      }
       window.close();
     };
     els.btnOpenPanel.onclick = () => {
