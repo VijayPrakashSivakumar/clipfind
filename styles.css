@@ -1,0 +1,3 @@
+/* ClipFind panel styles are injected at runtime by modules/ui.js (ensureStyles).
+   This file is loaded by the content script so the panel's base rules exist
+   as early as possible; ui.js owns the full theming. */

@@ -1,0 +1,133 @@
+* {
+  box-sizing: border-box;
+}
+:root {
+  --bg: #0f0f0f;
+  --panel: #181818;
+  --text: #f1f1f1;
+  --muted: #9aa0a6;
+  --accent: #3ea6ff;
+  --accent-hover: #65b8ff;
+  --border: #333;
+  --danger: #ff4d4f;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  width: 340px;
+  height: 460px;
+  overflow: hidden;
+}
+.popup {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+.popup-header .brand {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--accent), #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card h2 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+.small {
+  font-size: 12px;
+}
+.button-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #0b0b0b;
+  flex: 1;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  flex: 1;
+}
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.btn-text {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 4px 0;
+  cursor: pointer;
+  text-align: left;
+  align-self: flex-start;
+}
+.btn-text:hover {
+  text-decoration: underline;
+}
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.recent-item {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+.recent-name {
+  color: var(--text);
+  font-weight: 600;
+}
+.recent-meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+.popup-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--muted);
+}

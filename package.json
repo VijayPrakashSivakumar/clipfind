@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "name": "clipfind",
+  "version": "1.0.0",
+  "description": "ClipFind — AI-powered video discovery Chrome extension (Manifest V3).",
+  "private": true,
+  "scripts": {
+    "test": "node tests/core.test.mjs"
+  }
+}

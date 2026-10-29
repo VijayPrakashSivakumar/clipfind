@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment / secrets (never commit real keys)
+.env
+.env.local
+
+# Build / dist
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+~*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Chrome extension unpacked load artifacts
+*.zip
